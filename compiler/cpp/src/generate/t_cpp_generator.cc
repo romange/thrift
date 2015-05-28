@@ -3209,10 +3209,6 @@ void t_cpp_generator::generate_process_function(t_service* tservice,
 
   // I tried to do this as one function.  I really did.  But it was too hard.
   if (style != "Cob") {
-    // Open function
-    if (gen_templates_) {
-      out << indent() << "template <class Protocol_>" << endl;
-    }
     const bool unnamed_oprot_seqid = tfunction->is_oneway() && !(gen_templates_ && !specialized);
 
     string fname = tfunction->get_name();
@@ -3220,9 +3216,14 @@ void t_cpp_generator::generate_process_function(t_service* tservice,
     string resulttype = tservice->get_name() + "_" + fname + "_result";
     string args_obj = fname + "_args";
     string result_obj = fname + "_result";
-
     out << "static __thread " << argstype << "* " << args_obj << " = nullptr;\n";
-    out << "static __thread " << resulttype << "* " << result_obj << " = nullptr;\n\n";
+    if (!tfunction->is_oneway())
+      out << "static __thread " << resulttype << "* " << result_obj << " = nullptr;\n\n";
+
+        // Open function
+    if (gen_templates_) {
+      out << indent() << "template <class Protocol_>" << endl;
+    }
 
     out << "void " << tservice->get_name() << "Processor" << class_suffix << "::"
         << "process_" << fname << "("
